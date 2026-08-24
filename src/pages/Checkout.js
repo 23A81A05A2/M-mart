@@ -1,84 +1,227 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Checkout = ({ cart, clearCart }) => {
-    const navigate = useNavigate();
+function Checkout({ cart, clearCart }) {
+  const navigate = useNavigate();
 
-    // Calculate total price
-    const totalPrice = cart.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0
-    );
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    city: "",
+    pincode: "",
+  });
 
-    // Submit order to backend (replace with your real API endpoint)
-    const handleOrder = async() => {
-        if (cart.length === 0) {
-            alert("Your cart is empty!");
-            return;
-        }
+  const subtotal = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
-        // Example backend API call for saving the order
-        // await fetch('http://localhost:5000/api/orders', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ items: cart, total: totalPrice })
-        // });
+  const deliveryFee = subtotal > 0 ? 20 : 0;
+  const total = subtotal + deliveryFee;
 
-        alert("Order placed successfully!");
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-        clearCart(); // Clear the cart after order
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-        navigate("/success"); // Go to Success page after checkout
-    };
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
 
-    return ( <
-        div >
-        <
-        h2 className = "text-2xl font-bold mb-4" > Checkout < /h2>
+    clearCart();
+    navigate("/success");
+  };
 
-        {
-            cart.length === 0 ? ( <
-                p > Your cart is empty. < /p>
-            ) : ( <
-                div >
-                <
-                table className = "w-full border mb-4" >
-                <
-                thead >
-                <
-                tr >
-                <
-                th className = "border px-2 py-1" > Item < /th> <
-                th className = "border px-2 py-1" > Quantity < /th> <
-                th className = "border px-2 py-1" > Price < /th> < /
-                tr > <
-                /thead> <
-                tbody > {
-                    cart.map((item, index) => ( <
-                        tr key = { index } >
-                        <
-                        td className = "border px-2 py-1" > { item.name } < /td> <
-                        td className = "border px-2 py-1" > { item.quantity } < /td> <
-                        td className = "border px-2 py-1" > ₹{ item.price * item.quantity } < /td> < /
-                        tr >
-                    ))
-                } <
-                /tbody> < /
-                table >
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-8">
+        <p className="text-green-600 font-medium">
+          Almost there 🛍️
+        </p>
 
-                <
-                h3 className = "text-xl font-semibold mb-4" > Total: ₹{ totalPrice } < /h3>
+        <h2 className="text-3xl font-bold text-gray-800 mt-1">
+          Checkout
+        </h2>
 
-                <
-                button onClick = { handleOrder }
-                className = "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" >
-                Place Order <
-                /button> < /
-                div >
-            )
-        } <
-        /div>
-    );
-};
+        <p className="text-gray-500 mt-2">
+          Enter your delivery details to place your order.
+        </p>
+      </div>
+
+      {cart.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center shadow-sm">
+          <div className="text-5xl mb-4">🛒</div>
+
+          <h3 className="text-xl font-semibold text-gray-800">
+            Your cart is empty
+          </h3>
+
+          <p className="text-gray-500 mt-2 mb-6">
+            Add some products before checking out.
+          </p>
+
+          <button
+            onClick={() => navigate("/")}
+            className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Delivery Form */}
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">
+              Delivery Details
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your name"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number
+                </label>
+
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your phone number"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+
+                <textarea
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
+                  required
+                  rows="4"
+                  placeholder="Enter your complete address"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
+
+                  <input
+                    type="text"
+                    name="city"
+                    value={form.city}
+                    onChange={handleChange}
+                    required
+                    placeholder="City"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pincode
+                  </label>
+
+                  <input
+                    type="text"
+                    name="pincode"
+                    value={form.pincode}
+                    onChange={handleChange}
+                    required
+                    placeholder="Pincode"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition"
+              >
+                Place Order ₹{total}
+              </button>
+            </form>
+          </div>
+
+          {/* Order Summary */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit">
+            <h3 className="text-xl font-bold text-gray-800 mb-5">
+              Order Summary
+            </h3>
+
+            <div className="space-y-4">
+              {cart.map((item) => (
+                <div
+                  key={item.name}
+                  className="flex justify-between text-sm"
+                >
+                  <span className="text-gray-600">
+                    {item.name} × {item.quantity}
+                  </span>
+
+                  <span className="font-medium">
+                    ₹{item.price * item.quantity}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-200 my-5"></div>
+
+            <div className="space-y-3 text-gray-600">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{subtotal}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Delivery</span>
+                <span>₹{deliveryFee}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 my-5"></div>
+
+            <div className="flex justify-between text-lg font-bold text-gray-800">
+              <span>Total</span>
+              <span>₹{total}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Checkout;
